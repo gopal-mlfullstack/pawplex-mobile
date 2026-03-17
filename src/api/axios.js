@@ -1,85 +1,52 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL, // ← now uses .env value (live backend in production)
-  headers: { "Content-Type": "application/json" },
+  baseURL: import.meta.env.VITE_API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
-// Request interceptor: attach JWT
-API.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error),
-);
+// Attach access token
+API.interceptors.request.use((config) => {
+  const token = localStorage.getItem("access_token");
 
-// Response interceptor: auto-refresh on 401
-let isRefreshing = false;
-let failedQueue = [];
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
 
-const processQueue = (error, token = null) => {
-  failedQueue.forEach(({ resolve, reject }) => {
-    if (error) reject(error);
-    else resolve(token);
-  });
-  failedQueue = [];
-};
+  return config;
+});
 
+// Auto refresh token
 API.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
-    // Skip refresh for auth endpoints
-    if (
-      error.response?.status === 401 &&
-      !originalRequest._retry &&
-      !originalRequest.url.includes("/auth/login") &&
-      !originalRequest.url.includes("/auth/token/refresh")
-    ) {
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        }).then((token) => {
-          originalRequest.headers.Authorization = `Bearer ${token}`;
-          return API(originalRequest);
-        });
-      }
-
+    if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      isRefreshing = true;
-      const refreshToken = localStorage.getItem("refresh_token");
-
-      if (!refreshToken) {
-        processQueue(new Error("No refresh token"));
-        isRefreshing = false;
-        localStorage.clear();
-        window.location.href = "/login";
-        return Promise.reject(error);
-      }
 
       try {
-        const { data } = await axios.post(
-          `${import.meta.env.VITE_API_URL}/auth/token/refresh/`, // ← use .env here too
-          { refresh: refreshToken },
+        const refresh = localStorage.getItem("refresh_token");
+
+        const res = await axios.post(
+          `${import.meta.env.VITE_API_URL}/auth/token/refresh/`,
+          { refresh },
         );
 
-        localStorage.setItem("access_token", data.access);
-        API.defaults.headers.common.Authorization = `Bearer ${data.access}`;
-        processQueue(null, data.access);
-        originalRequest.headers.Authorization = `Bearer ${data.access}`;
+        const newAccess = res.data.access;
+
+        localStorage.setItem("access_token", newAccess);
+
+        originalRequest.headers.Authorization = `Bearer ${newAccess}`;
+
         return API(originalRequest);
-      } catch (refreshError) {
-        processQueue(refreshError);
-        localStorage.clear();
+      } catch (err) {
+        localStorage.removeItem("access_token");
+        localStorage.removeItem("refresh_token");
+
         window.location.href = "/login";
-        return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
       }
     }
 
