@@ -1,39 +1,74 @@
-// vite.config.js
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import { VitePWA } from 'vite-plugin-pwa'
-import tailwindcss from '@tailwindcss/vite';
+import { defineConfig } from "vite";
+import react from "@vitejs/plugin-react";
+import { VitePWA } from "vite-plugin-pwa";
+import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
   plugins: [
-    react(),tailwindcss(),
+    react(),
+    tailwindcss(),
     VitePWA({
-      registerType: 'autoUpdate',
-      includeAssets: ['icons/*.png'],
+      registerType: "autoUpdate",
+
+      includeAssets: [
+        "favicon.ico",
+        "apple-touch-icon.png",
+        "icons/icon-192x192.png",
+        "icons/icon-512x512.png",
+      ],
+
       manifest: {
-        name: 'PawCare – Pet Super App',
-        short_name: 'PawCare',
-        description: 'Your complete pet care companion',
-        theme_color: '#4A7158',
-        background_color: '#F7F3EE',
-        display: 'standalone',
-        orientation: 'portrait',
-        start_url: '/',
+        name: "PawCare – Pet Super App",
+        short_name: "PawCare",
+        description: "Your complete pet care companion",
+
+        theme_color: "#4A7158",
+        background_color: "#F7F3EE",
+
+        display: "standalone",
+        orientation: "portrait",
+        start_url: "/",
+
         icons: [
-          { src: 'icons/icon-192x192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'icons/icon-512x512.png', sizes: '512x512', type: 'image/png' }
-        ]
+          {
+            src: "/icons/icon-192x192.png",
+            sizes: "192x192",
+            type: "image/png",
+          },
+          {
+            src: "/icons/icon-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+          },
+          {
+            src: "/icons/icon-512x512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "any maskable",
+          },
+        ],
       },
+
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        globPatterns: ["**/*.{js,css,html,ico,png,svg}"],
+
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/api\./i,
-            handler: 'NetworkFirst',
-            options: { cacheName: 'api-cache' }
-          }
-        ]
-      }
-    })
-  ]
-})
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "api-cache",
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24,
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+        ],
+      },
+    }),
+  ],
+});
