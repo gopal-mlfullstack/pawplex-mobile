@@ -33,7 +33,7 @@ export default function Login() {
 
     setLoading(true);
     try {
-      const { data } = await loginAPI(form);
+      const data = await loginAPI(form);
       login(
         { access: data.access, refresh: data.refresh, role: data.role },
         { username: form.username, role: data.role },

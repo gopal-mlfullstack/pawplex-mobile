@@ -50,7 +50,7 @@ export default function Register() {
       });
 
       // Auto-login after registration
-      const { data } = await loginAPI({
+      const data = await loginAPI({
         username: form.username,
         password: form.password,
       });
