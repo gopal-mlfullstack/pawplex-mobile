@@ -1,13 +1,9 @@
-import API from './axios'
+import API from "./axios";
 
-export const getNotifications = () =>
-  API.get('/notifications/')
+export const getNotifications = () => API.get("api/notifications/");
 
-export const getUnreadCount = () =>
-  API.get('/notifications/unread-count/')
+export const getUnreadCount = () => API.get("api/notifications/unread-count/");
 
-export const markRead = (id) =>
-  API.patch(`/notifications/${id}/read/`)
+export const markRead = (id) => API.patch(`api/notifications/${id}/read/`);
 
-export const markAllRead = () =>
-  API.post('/notifications/mark-all-read/')
+export const markAllRead = () => API.post("api/notifications/mark-all-read/");

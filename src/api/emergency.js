@@ -1,19 +1,16 @@
-import API from './axios'
+import API from "./axios";
 
-export const triggerSOS = (data) =>
-  API.post('/emergency/sos/', data)
+export const triggerSOS = (data) => API.post("/api/emergency/sos/", data);
 
-export const getSOSList = () =>
-  API.get('/emergency/sos/list/')
+export const getSOSList = () => API.get("/api/emergency/sos/list/");
 
 export const resolveSOS = (id) =>
-  API.patch(`/emergency/sos/${id}/resolve/`)
+  API.patch(`/api/emergency/sos/${id}/resolve/`);
 
 export const getNearbyVets = (lat, lng) =>
-  API.get('/emergency/nearby/', { params: { lat, lng } })
+  API.get("/api/emergency/nearby/", { params: { lat, lng } });
 
-export const getContacts = () =>
-  API.get('/emergency/contacts/')
+export const getContacts = () => API.get("/api/emergency/contacts/");
 
 export const createContact = (data) =>
-  API.post('/emergency/contacts/', data)
+  API.post("/api/emergency/contacts/", data);
