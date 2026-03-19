@@ -1,6 +1,6 @@
 import API from "./axios";
 
-export const getPosts = () => API.get("/api/community/posts/");
+export const getPosts = () => API.get("/community/posts/");
 
 export const createPost = (data) => {
   // Support FormData for image uploads
